@@ -53,6 +53,12 @@ const App = () => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Validación extra por si suben una foto
+    if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+       // Intentamos leerlo igual por si acaso, pero avisamos
+       // (A veces Android no manda el type correcto)
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -62,10 +68,10 @@ const App = () => {
           setUploadStatus(`¡Vientos! Se cargaron ${json.length} cartas.`);
           setTimeout(() => setUploadStatus(''), 3000);
         } else {
-          setUploadStatus('Nel, ese JSON no sirve. Revisa el formato.');
+          setUploadStatus('Nel, ese archivo no trae las preguntas. Sube el JSON.');
         }
       } catch (error) {
-        setUploadStatus('Error: No pude leer ese archivo.');
+        setUploadStatus('Error: Ese archivo no es un JSON válido.');
       }
     };
     reader.readAsText(file);
@@ -161,7 +167,7 @@ const App = () => {
               <FileJson className="w-8 h-8 text-rose-400" />
             </div>
             <h2 className="text-2xl font-bold mb-2">¡Faltan las Cartas!</h2>
-            <p className="text-slate-400 mb-6">Esta versión no tiene preguntas precargadas. Necesitas subir tu archivo JSON para empezar a jugar.</p>
+            <p className="text-slate-400 mb-6">Esta versión no tiene preguntas precargadas. Sube tu archivo JSON para empezar a jugar.</p>
             
             <button 
               onClick={() => fileInputRef.current.click()}
@@ -171,7 +177,7 @@ const App = () => {
             </button>
             <input 
               type="file" 
-              accept=".json" 
+              accept="*" // AQUI ESTA EL TRUCO: Aceptamos todo para que Android muestre "Archivos"
               ref={fileInputRef} 
               onChange={handleFileUpload} 
               className="hidden" 
@@ -189,11 +195,9 @@ const App = () => {
   }
 
   return (
-    // Agregamos 'items-center' aquí para forzar el centrado horizontal de todo
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center relative overflow-hidden font-sans">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-rose-900/20 via-transparent to-transparent z-0 pointer-events-none"></div>
       
-      {/* Header con w-full para que estire todo el ancho */}
       <header className="w-full z-10 flex justify-center bg-slate-900/50 backdrop-blur-sm border-b border-white/5">
         <div className="w-full max-w-5xl flex justify-between items-center p-4 md:p-6">
           <div className="flex items-center gap-2">
@@ -209,7 +213,6 @@ const App = () => {
         </div>
       </header>
 
-      {/* Main ajustado: w-full y max-w-5xl, el items-center del padre se encarga de centrarlo */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 z-10 w-full max-w-md md:max-w-5xl transition-all duration-300">
         
         <div className="mb-6 md:mb-8 text-center">
@@ -355,9 +358,10 @@ const App = () => {
                     >
                       <Upload className="w-4 h-4" /> Cambiar Pack
                     </button>
+                    {/* AQUI TAMBIEN APLICAMOS EL TRUCO PARA EL SEGUNDO INPUT */}
                     <input 
                       type="file" 
-                      accept=".json" 
+                      accept="*" 
                       ref={fileInputRef} 
                       onChange={handleFileUpload} 
                       className="hidden" 
